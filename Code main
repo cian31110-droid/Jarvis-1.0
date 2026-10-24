@@ -1,0 +1,333 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#030914">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>J.A.R.V.I.S. // Mobile HUD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Orbitron for HUD headers, Rajdhani for data readouts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --cyan-glow: #00f3ff;
+            --cyan-dim: rgba(0, 243, 255, 0.18);
+            --bg-deep: #030914;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: var(--bg-deep);
+            color: #e0faff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 42%, rgba(0, 243, 255, 0.14) 0%, transparent 60%),
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 28px 28px, 28px 28px;
+        }
+        .font-hud {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        /* Holographic Cards & Borders */
+        .hud-panel {
+            background: rgba(5, 19, 36, 0.72);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.35);
+            box-shadow: 0 0 18px rgba(0, 243, 255, 0.12), inset 0 0 15px rgba(0, 243, 255, 0.07);
+            position: relative;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hud-panel:active, .hud-panel.active-module {
+            border-color: #00f3ff;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.4), inset 0 0 20px rgba(0, 243, 255, 0.18);
+            transform: scale(0.98);
+        }
+        /* Corner Brackets */
+        .hud-corner::before, .hud-corner::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-color: #00f3ff;
+            pointer-events: none;
+        }
+        .hud-corner::before {
+            top: -1px; left: -1px;
+            border-top: 2px solid #00f3ff;
+            border-left: 2px solid #00f3ff;
+        }
+        .hud-corner::after {
+            bottom: -1px; right: -1px;
+            border-bottom: 2px solid #00f3ff;
+            border-right: 2px solid #00f3ff;
+        }
+
+        /* Animations for the Arc Reactor Core */
+        @keyframes spin-slow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes pulse-ring {
+            0%, 100% { transform: scale(1); opacity: 0.75; }
+            50% { transform: scale(1.06); opacity: 1; }
+        }
+        .ring-spin-1 { animation: spin-slow 24s linear infinite; }
+        .ring-spin-2 { animation: spin-reverse 16s linear infinite; }
+        .ring-spin-3 { animation: spin-slow 9s linear infinite; }
+        .core-pulse { animation: pulse-ring 3s ease-in-out infinite; }
+
+        /* State-based Core Glows */
+        .state-listening .core-glow {
+            filter: drop-shadow(0 0 22px #ff3366);
+        }
+        .state-thinking .core-glow {
+            filter: drop-shadow(0 0 24px #ffaa00);
+        }
+        .state-speaking .core-glow {
+            filter: drop-shadow(0 0 26px #00ffaa);
+        }
+        .state-online .core-glow {
+            filter: drop-shadow(0 0 18px #00f3ff);
+        }
+
+        /* Equalizer Bars */
+        .eq-bar {
+            transition: height 0.12s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(3, 9, 20, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.4); border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between select-none p-2.5 sm:p-5 state-online" id="app-body">
+
+    <!-- ================= TOP HUD BAR ================= -->
+    <header class="w-full max-w-4xl mx-auto flex items-center justify-between px-3 py-2.5 hud-panel hud-corner rounded-xl z-20">
+        <div class="flex items-center space-x-2.5">
+            <div class="relative flex items-center justify-center w-3.5 h-3.5">
+                <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span id="status-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
+            </div>
+            <span class="font-hud font-extrabold tracking-widest text-base sm:text-xl text-cyan-300 drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">J.A.R.V.I.S.</span>
+            <span class="hidden sm:inline-block text-xs text-cyan-500/80 tracking-widest font-mono border-l border-cyan-500/30 pl-2">MARK VII MOBILE</span>
+        </div>
+
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <!-- Continuous Live Mode Toggle -->
+            <button id="live-mode-btn" onclick="toggleContinuousLiveMode()" title="Toggle Hands-Free Live Mode" class="hud-panel px-2.5 py-1 rounded-full text-emerald-300 border-emerald-400/60 flex items-center space-x-1.5 text-xs font-hud tracking-wider">
+                <span id="live-mode-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="live-mode-label">LIVE: ON</span>
+            </button>
+
+            <!-- Live Status Pill -->
+            <div id="status-badge" class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-950/90 border border-cyan-400/50 text-cyan-300 text-xs font-hud tracking-wider">
+                <span id="status-text">ONLINE</span>
+            </div>
+
+            <!-- Sound / Voice Mode Toggle -->
+            <button id="voice-mode-btn" onclick="toggleVoiceEngine()" title="Switch Voice Engine" class="hud-panel p-2 rounded-lg text-cyan-300 hover:text-white flex items-center space-x-1 text-xs font-semibold">
+                <i data-lucide="volume-2" class="w-4 h-4 text-cyan-400"></i>
+                <span id="voice-engine-label" class="hidden xs:inline">FREE VOICE</span>
+            </button>
+
+            <!-- Settings Modal Trigger -->
+            <button onclick="openModal('settings-modal')" title="System Configuration" class="hud-panel p-2 rounded-lg text-cyan-300 hover:text-white">
+                <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ================= MAIN HOLOGRAPHIC INTERFACE ================= -->
+    <main class="w-full max-w-4xl mx-auto flex-1 flex flex-col justify-center my-2 sm:my-4 relative">
+        
+        <!-- 3-Column Layout on Tablet/Desktop, Compact HUD Grid on Mobile -->
+        <div class="grid grid-cols-12 gap-2.5 sm:gap-4 items-center">
+            
+            <!-- LEFT TELEMETRY COLUMN (3 modules matching video) -->
+            <div class="col-span-12 sm:col-span-3 grid grid-cols-3 sm:grid-cols-1 gap-2 sm:gap-3 order-2 sm:order-1">
+                
+                <!-- AI Core Card -->
+                <button onclick="openModal('settings-modal')" class="hud-panel hud-corner rounded-xl p-2.5 sm:p-3.5 text-left flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-cyan-400 mb-1">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="cpu" class="w-4 h-4"></i>
+                            <span class="font-hud text-[11px] sm:text-xs font-bold tracking-wider text-cyan-200">AI CORE</span>
+                        </div>
+                    </div>
+                    <div class="text-[11px] sm:text-xs text-emerald-400 font-semibold flex items-center space-x-1">
+                        <span>●</span>
+                        <span id="core-model-readout" class="truncate">Gemini 3 Flash</span>
+                    </div>
+                    <!-- Mini animated bars -->
+                    <div class="flex items-end space-x-1 h-4 mt-2 opacity-80">
+                        <div class="w-1.5 bg-cyan-400 h-3 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-400 h-4 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-400 h-2 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-400 h-3.5 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-500/40 h-1.5 rounded-t"></div>
+                    </div>
+                </button>
+
+                <!-- Voice Card -->
+                <button onclick="toggleMute()" class="hud-panel hud-corner rounded-xl p-2.5 sm:p-3.5 text-left flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-cyan-400 mb-1">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="mic" class="w-4 h-4"></i>
+                            <span class="font-hud text-[11px] sm:text-xs font-bold tracking-wider text-cyan-200">VOICE</span>
+                        </div>
+                    </div>
+                    <div id="voice-status-readout" class="text-[11px] sm:text-xs text-emerald-400 font-semibold flex items-center space-x-1">
+                        <span>●</span>
+                        <span>Online</span>
+                    </div>
+                    <!-- Dynamic Equalizer Bars -->
+                    <div id="mini-voice-eq" class="flex items-end space-x-1 h-4 mt-2 opacity-80">
+                        <div class="eq-bar w-1.5 bg-cyan-400 h-1.5 rounded-t"></div>
+                        <div class="eq-bar w-1.5 bg-cyan-400 h-2.5 rounded-t"></div>
+                        <div class="eq-bar w-1.5 bg-cyan-400 h-4 rounded-t"></div>
+                        <div class="eq-bar w-1.5 bg-cyan-400 h-2 rounded-t"></div>
+                        <div class="eq-bar w-1.5 bg-cyan-400 h-3 rounded-t"></div>
+                    </div>
+                </button>
+
+                <!-- Memory Card -->
+                <button onclick="openModal('memory-modal')" class="hud-panel hud-corner rounded-xl p-2.5 sm:p-3.5 text-left flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-cyan-400 mb-1">
+                        <div class="flex items-center space-x-1.5">
+                            <i data-lucide="database" class="w-4 h-4"></i>
+                            <span class="font-hud text-[11px] sm:text-xs font-bold tracking-wider text-cyan-200">MEMORY</span>
+                        </div>
+                    </div>
+                    <div class="text-[11px] sm:text-xs text-emerald-400 font-semibold flex items-center space-x-1">
+                        <span>●</span>
+                        <span id="memory-count-readout">Ready (3)</span>
+                    </div>
+                    <div class="flex items-end space-x-1 h-4 mt-2 opacity-80">
+                        <div class="w-1.5 bg-cyan-400 h-2 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-400 h-3 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-400 h-3.5 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-400 h-4 rounded-t"></div>
+                        <div class="w-1.5 bg-cyan-400 h-2.5 rounded-t"></div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- CENTER ARC REACTOR CORE (Tap to Speak) -->
+            <div class="col-span-12 sm:col-span-6 flex flex-col items-center justify-center order-1 sm:order-2 my-1 sm:my-0">
+                <button type="button" id="arc-reactor-btn" onclick="handleCoreTap(event)" class="relative w-60 h-60 sm:w-72 sm:h-72 flex items-center justify-center cursor-pointer group focus:outline-none active:scale-95 transition-transform duration-150">
+                    
+                    <!-- SVG Arc Reactor Globe & Concentric Tech Rings -->
+                    <svg viewBox="0 0 300 300" class="w-full h-full core-glow transition-all duration-500 pointer-events-none">
+                        <defs>
+                            <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#00f3ff" stop-opacity="0.35"/>
+                                <stop offset="65%" stop-color="#0066ff" stop-opacity="0.12"/>
+                                <stop offset="100%" stop-color="#00f3ff" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+
+                        <!-- Ambient Center Glow -->
+                        <circle cx="150" cy="150" r="125" fill="url(#coreGrad)" class="core-pulse" />
+
+                        <!-- Outer Segmented Ring (Slow Spin) -->
+                        <g class="ring-spin-1" style="transform-origin: 150px 150px;">
+                            <circle cx="150" cy="150" r="136" fill="none" stroke="#00f3ff" stroke-width="1.5" stroke-opacity="0.35" stroke-dasharray="18 8 4 8" />
+                            <circle cx="150" cy="150" r="128" fill="none" stroke="#00f3ff" stroke-width="4" stroke-opacity="0.6" stroke-dasharray="45 90" />
+                        </g>
+
+                        <!-- Middle Counter-Rotating Ring -->
+                        <g class="ring-spin-2" style="transform-origin: 150px 150px;">
+                            <circle cx="150" cy="150" r="112" fill="none" stroke="#00f3ff" stroke-width="2" stroke-opacity="0.7" stroke-dasharray="8 12" />
+                            <circle cx="150" cy="150" r="104" fill="none" stroke="#38bdf8" stroke-width="5" stroke-opacity="0.45" stroke-dasharray="60 120 20 60" />
+                        </g>
+
+                        <!-- Inner Fast Tech Ring -->
+                        <g class="ring-spin-3" style="transform-origin: 150px 150px;">
+                            <circle cx="150" cy="150" r="88" fill="none" stroke="#00f3ff" stroke-width="1.5" stroke-opacity="0.85" stroke-dasharray="100 40 15 40" />
+                        </g>
+
+                        <!-- Wireframe Globe Grid Lines -->
+                        <g stroke="#00f3ff" stroke-opacity="0.22" fill="none" stroke-width="1">
+                            <circle cx="150" cy="150" r="76" stroke-opacity="0.5" />
+                            <ellipse cx="150" cy="150" rx="76" ry="32" />
+                            <ellipse cx="150" cy="150" rx="32" ry="76" />
+                            <ellipse cx="150" cy="150" rx="58" ry="76" />
+                            <line x1="74" y1="150" x2="226" y2="150" stroke-opacity="0.4" />
+                            <line x1="150" y1="74" x2="150" y2="226" stroke-opacity="0.4" />
+                        </g>
+                    </svg>
+
+                    <!-- Center Overlay Typography & Waveform -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-[10px] font-hud tracking-[0.3em] text-cyan-400/80 mb-0.5" id="reactor-subtext">TAP CORE TO SPEAK</span>
+                        <h1 class="font-hud font-black text-2xl sm:text-3xl tracking-[0.2em] text-white drop-shadow-[0_0_12px_rgba(0,243,255,0.95)]">
+                            J.A.R.V.I.S
+                        </h1>
+                        
+                        <!-- Center Audio Waveform -->
+                        <div id="center-wave" class="flex items-center justify-center space-x-1 h-7 mt-1.5">
+                            <div class="w-1 bg-cyan-300 rounded-full h-2 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-4 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-3 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-6 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-3 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-5 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-2 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-4 eq-bar"></div>
+                            <div class="w-1 bg-cyan-300 rounded-full h-2 eq-bar"></div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- RIGHT ACTION MODULES COLUMN (Web, Images, Email, Phone) -->
+            <div class="col-span-12 sm:col-span-3 grid grid-cols-4 sm:grid-cols-1 gap-2 sm:gap-2.5 order-3">
+                
+                <!-- Web Search Grounding Module -->
+                <button onclick="triggerQuickAction('web')" id="mod-web" class="hud-panel hud-corner rounded-xl p-2.5 sm:px-3.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between text-cyan-200 hover:text-white">
+                    <div class="flex flex-col sm:flex-row items-center sm:space-x-2.5">
+                        <i data-lucide="globe" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mb-1 sm:mb-0"></i>
+                        <span class="font-hud text-[11px] sm:text-sm font-semibold tracking-wider">Web</span>
+                    </div>
+                    <span class="hidden sm:inline-block w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f3ff]"></span>
+                </button>
+
+                <!-- AI Image Generator Module -->
+                <button onclick="triggerQuickAction('image')" id="mod-image" class="hud-panel hud-corner rounded-xl p-2.5 sm:px-3.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between text-cyan-200 hover:text-white">
+                    <div class="flex flex-col sm:flex-row items-center sm:space-x-2.5">
+                        <i data-lucide="image" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mb-1 sm:mb-0"></i>
+                        <span class="font-hud text-[11px] sm:text-sm font-semibold tracking-wider">Images</span>
+                    </div>
+                    <span class="hidden sm:inline-block w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f3ff]"></span>
+                </button>
+
+                <!-- Comms & Email Module -->
+                <button onclick="triggerQuickAction('email')" id="mod-email" class="hud-panel hud-corner rounded-xl p-2.5 sm:px-3.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between text-cyan-200 hover:text-white">
+                    <div class="flex flex-col sm:flex-row items-center sm:space-x-2.5">
+                        <i data-lucide="mail" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mb-1 sm:mb-0"></i>
+                        <span class="font-hud text-[11px] sm:text-sm font-semibold tracking-wider">Email</span>
+                    </div>
+                    <span class="hidden sm:inline-block w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f3ff]"></span>
+                </button>
+
+                <!-- Phone Control & Deep Links Module -->
+                <button onclick="openModal('phone-modal')" id="mod-phone" class="hud-panel hud-corner rounded-xl p-2.5 sm:px-3.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between text-cyan-200 hover:text-white">
+                    <div class="flex flex-col sm:flex-row items-center sm:space-x-2.5">
+                        <i data-lucide="smartphone" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mb-1 sm:mb
