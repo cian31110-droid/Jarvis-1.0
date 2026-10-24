@@ -7,6 +7,8 @@
     <meta name="theme-color" content="#030914">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="J.A.R.V.I.S.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23030914' stroke='%2300f3ff' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='22' fill='%2300f3ff'/%3E%3C/svg%3E">
     <title>J.A.R.V.I.S. // Mobile HUD</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -148,11 +150,23 @@
             </button>
 
             <!-- Settings Modal Trigger -->
-            <button onclick="openModal('settings-modal')" title="System Configuration" class="hud-panel p-2 rounded-lg text-cyan-300 hover:text-white">
+            <button onclick="openModal('settings-modal')" title="System Configuration" class="hud-panel p-2 rounded-lg text-cyan-300 hover:text-white relative">
                 <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i>
+                <span id="api-key-warning-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-ping"></span>
             </button>
         </div>
     </header>
+
+    <!-- STANDALONE GITHUB PAGES API KEY BANNER (Hidden if key is set) -->
+    <div id="api-key-banner" class="hidden w-full max-w-4xl mx-auto mt-2 hud-panel rounded-xl px-3.5 py-2 border border-amber-400/60 bg-amber-950/40 flex items-center justify-between text-xs text-amber-200 z-20">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="key" class="w-4 h-4 text-amber-400 shrink-0"></i>
+            <span><strong>GitHub Standalone Mode:</strong> Add your free Gemini API key to activate J.A.R.V.I.S. brain & web search.</span>
+        </div>
+        <button onclick="openModal('settings-modal')" class="ml-2 px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-hud font-bold text-[10px] tracking-wider shrink-0">
+            SET KEY
+        </button>
+    </div>
 
     <!-- ================= MAIN HOLOGRAPHIC INTERFACE ================= -->
     <main class="w-full max-w-4xl mx-auto flex-1 flex flex-col justify-center my-2 sm:my-4 relative">
@@ -315,19 +329,4 @@
                         <i data-lucide="image" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mb-1 sm:mb-0"></i>
                         <span class="font-hud text-[11px] sm:text-sm font-semibold tracking-wider">Images</span>
                     </div>
-                    <span class="hidden sm:inline-block w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f3ff]"></span>
-                </button>
-
-                <!-- Comms & Email Module -->
-                <button onclick="triggerQuickAction('email')" id="mod-email" class="hud-panel hud-corner rounded-xl p-2.5 sm:px-3.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between text-cyan-200 hover:text-white">
-                    <div class="flex flex-col sm:flex-row items-center sm:space-x-2.5">
-                        <i data-lucide="mail" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mb-1 sm:mb-0"></i>
-                        <span class="font-hud text-[11px] sm:text-sm font-semibold tracking-wider">Email</span>
-                    </div>
-                    <span class="hidden sm:inline-block w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f3ff]"></span>
-                </button>
-
-                <!-- Phone Control & Deep Links Module -->
-                <button onclick="openModal('phone-modal')" id="mod-phone" class="hud-panel hud-corner rounded-xl p-2.5 sm:px-3.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between text-cyan-200 hover:text-white">
-                    <div class="flex flex-col sm:flex-row items-center sm:space-x-2.5">
-                        <i data-lucide="smartphone" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mb-1 sm:mb
+                    <span class="hidden sm:inline-block w-2 h-2 rounded-full bg-
