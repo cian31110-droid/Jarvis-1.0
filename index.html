@@ -207,23 +207,26 @@
                 <span id="voice-engine-label" class="hidden md:inline text-[10px] font-hud">FREE VOICE</span>
             </button>
 
-            <!-- Settings Modal Trigger -->
-            <button onclick="openModal('settings-modal')" title="System Configuration" class="hud-panel p-2 rounded-lg text-cyan-300 hover:text-white relative">
-                <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i>
+            <!-- HIGH-VISIBILITY API KEY & SETTINGS BUTTON (Works even if icons don't load) -->
+            <button onclick="openModal('settings-modal')" title="Enter API Key & Settings" class="hud-panel px-2.5 py-1.5 rounded-lg bg-amber-500/20 border border-amber-400 text-amber-300 hover:bg-amber-400 hover:text-slate-950 font-hud font-bold text-[10px] sm:text-xs tracking-wider flex items-center space-x-1 relative shadow-[0_0_12px_rgba(251,191,36,0.35)]">
+                <span>🔑 KEY</span>
                 <span id="api-key-warning-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-ping"></span>
             </button>
         </div>
     </header>
 
-    <!-- STANDALONE GITHUB PAGES API KEY BANNER (Hidden if key is set) -->
-    <div id="api-key-banner" class="hidden w-full max-w-4xl mx-auto mt-2 hud-panel rounded-xl px-3.5 py-2 border border-amber-400/60 bg-amber-950/50 flex items-center justify-between text-xs text-amber-200 z-20">
+    <!-- ALWAYS-VISIBLE QUICK API KEY INPUT BAR (Hides automatically once your key is saved) -->
+    <div id="api-key-banner" class="w-full max-w-4xl mx-auto mt-2 hud-panel rounded-xl p-2.5 sm:px-4 sm:py-2.5 border border-amber-400/80 bg-amber-950/70 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-xs text-amber-200 z-20 shadow-[0_0_20px_rgba(251,191,36,0.2)]">
         <div class="flex items-center space-x-2">
-            <i data-lucide="key" class="w-4 h-4 text-amber-400 shrink-0"></i>
-            <span><strong>GitHub Pages Mode:</strong> Add your free Gemini API key to activate J.A.R.V.I.S. brain, vision & web search.</span>
+            <span class="text-base">🔑</span>
+            <span><strong>Step 1:</strong> Paste your free Gemini API key (<a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-amber-300 font-bold">Get Key Here</a>):</span>
         </div>
-        <button onclick="openModal('settings-modal')" class="ml-2 px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-hud font-bold text-[10px] tracking-wider shrink-0">
-            SET KEY
-        </button>
+        <div class="flex items-center space-x-1.5 flex-1 max-w-md">
+            <input type="password" id="quick-banner-api-key" placeholder="Paste AIza... key here" class="flex-1 bg-slate-950/90 border border-amber-400/60 rounded-lg px-2.5 py-1.5 text-xs text-amber-100 placeholder-amber-400/50 focus:outline-none" />
+            <button onclick="saveQuickBannerKey()" class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-hud font-bold text-[11px] tracking-wider shrink-0 hover:bg-amber-300">
+                SAVE KEY
+            </button>
+        </div>
     </div>
 
     <!-- ================= MAIN HOLOGRAPHIC INTERFACE ================= -->
@@ -337,14 +340,4 @@
 
                         <!-- Middle Counter-Rotating Ring -->
                         <g class="ring-spin-2" style="transform-origin: 150px 150px;">
-                            <circle cx="150" cy="150" r="112" fill="none" stroke="var(--hud-primary)" stroke-width="2" stroke-opacity="0.7" stroke-dasharray="8 12" />
-                            <circle cx="150" cy="150" r="104" fill="none" stroke="var(--hud-primary)" stroke-width="5" stroke-opacity="0.45" stroke-dasharray="60 120 20 60" />
-                        </g>
-
-                        <!-- Inner Fast Tech Ring -->
-                        <g class="ring-spin-3" style="transform-origin: 150px 150px;">
-                            <circle cx="150" cy="150" r="88" fill="none" stroke="var(--hud-primary)" stroke-width="1.5" stroke-opacity="0.85" stroke-dasharray="100 40 15 40" />
-                        </g>
-
-                        <!-- Wireframe Globe Grid Lines -->
-                        <g stroke="var(--hud-prima
+                            <circle cx="150" cy="150" r="112" fill="none" stroke="var(--hud-primary)" stroke-width="2"
