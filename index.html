@@ -1,343 +1,377 @@
-```html
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#030914">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="J.A.R.V.I.S.">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23030914' stroke='%2300f3ff' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='22' fill='%2300f3ff'/%3E%3C/svg%3E">
-    <title>J.A.R.V.I.S. // Mobile HUD</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Orbitron for HUD headers, Rajdhani for data readouts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        :root {
-            --hud-primary: #00f3ff;
-            --hud-secondary: #0066ff;
-            --hud-rgb: 0, 243, 255;
-            --bg-deep: #030914;
-        }
-        body.theme-friday {
-            --hud-primary: #ff3355;
-            --hud-secondary: #ffaa00;
-            --hud-rgb: 255, 51, 85;
-            --bg-deep: #140307;
-        }
-        body.theme-stealth {
-            --hud-primary: #00ff88;
-            --hud-secondary: #00994d;
-            --hud-rgb: 0, 255, 136;
-            --bg-deep: #021008;
-        }
-        body.theme-hulkbuster {
-            --hud-primary: #ffcc00;
-            --hud-secondary: #ff3300;
-            --hud-rgb: 255, 204, 0;
-            --bg-deep: #140b02;
-        }
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            background-color: var(--bg-deep);
-            color: #e0faff;
-            font-family: 'Rajdhani', sans-serif;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 42%, rgba(var(--hud-rgb), 0.16) 0%, transparent 60%),
-                linear-gradient(rgba(var(--hud-rgb), 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(var(--hud-rgb), 0.04) 1px, transparent 1px);
-            background-size: 100% 100%, 28px 28px, 28px 28px;
-            transition: background-color 0.4s ease, color 0.4s ease;
-        }
-        .font-hud {
-            font-family: 'Orbitron', sans-serif;
-        }
-        
-        /* Holographic Cards & Borders */
-        .hud-panel {
-            background: rgba(5, 19, 36, 0.72);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(var(--hud-rgb), 0.38);
-            box-shadow: 0 0 18px rgba(var(--hud-rgb), 0.12), inset 0 0 15px rgba(var(--hud-rgb), 0.07);
-            position: relative;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .hud-panel:active, .hud-panel.active-module {
-            border-color: var(--hud-primary);
-            box-shadow: 0 0 25px rgba(var(--hud-rgb), 0.45), inset 0 0 20px rgba(var(--hud-rgb), 0.2);
-            transform: scale(0.98);
-        }
-        /* Corner Brackets */
-        .hud-corner::before, .hud-corner::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-color: var(--hud-primary);
-            pointer-events: none;
-        }
-        .hud-corner::before {
-            top: -1px; left: -1px;
-            border-top: 2px solid var(--hud-primary);
-            border-left: 2px solid var(--hud-primary);
-        }
-        .hud-corner::after {
-            bottom: -1px; right: -1px;
-            border-bottom: 2px solid var(--hud-primary);
-            border-right: 2px solid var(--hud-primary);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Daily Brief // Liquid Glass OS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --glass-blur: 26px;
+      --glass-bg: rgba(255, 255, 255, 0.58);
+      --glass-border: rgba(255, 255, 255, 0.85);
+      --glass-shadow: 0 12px 36px -8px rgba(15, 23, 42, 0.1), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
+    }
 
-        /* Animations for the Arc Reactor Core */
-        @keyframes spin-slow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes spin-reverse {
-            0% { transform: rotate(360deg); }
-            100% { transform: rotate(0deg); }
-        }
-        @keyframes pulse-ring {
-            0%, 100% { transform: scale(1); opacity: 0.75; }
-            50% { transform: scale(1.06); opacity: 1; }
-        }
-        .ring-spin-1 { animation: spin-slow 24s linear infinite; }
-        .ring-spin-2 { animation: spin-reverse 16s linear infinite; }
-        .ring-spin-3 { animation: spin-slow 9s linear infinite; }
-        .core-pulse { animation: pulse-ring 3s ease-in-out infinite; }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
 
-        /* State-based Core Glows */
-        .state-listening .core-glow {
-            filter: drop-shadow(0 0 24px #ff3366);
-        }
-        .state-thinking .core-glow {
-            filter: drop-shadow(0 0 26px #ffaa00);
-        }
-        .state-speaking .core-glow {
-            filter: drop-shadow(0 0 28px #00ffaa);
-        }
-        .state-online .core-glow {
-            filter: drop-shadow(0 0 20px var(--hud-primary));
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden; /* ZERO SCROLLING GUARANTEED */
+      background: #f1f5f9;
+      color: #0f172a;
+    }
 
-        /* Equalizer Bars */
-        .eq-bar {
-            transition: height 0.08s ease;
-            background-color: var(--hud-primary);
-        }
+    /* Animated Daylight / Evening Mesh Background */
+    .mesh-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 15% 15%, #bae6fd 0%, transparent 45%),
+        radial-gradient(circle at 85% 20%, #e0e7ff 0%, transparent 45%),
+        radial-gradient(circle at 75% 85%, #fce7f3 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, #ccfbf1 0%, transparent 45%),
+        #f8fafc;
+      transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
 
-        /* AR Camera Background Layer */
-        #ar-camera-feed {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            z-index: 0;
-            opacity: 0.55;
-            filter: contrast(1.15) saturate(1.2);
-        }
-        #ar-reticle {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 1;
-            border: 1px solid rgba(var(--hud-rgb), 0.25);
-        }
+    body.evening-mode .mesh-bg {
+      background: 
+        radial-gradient(circle at 20% 15%, #fde68a 0%, transparent 45%),
+        radial-gradient(circle at 85% 25%, #fed7aa 0%, transparent 50%),
+        radial-gradient(circle at 75% 85%, #fecdd3 0%, transparent 50%),
+        radial-gradient(circle at 15% 85%, #fef3c7 0%, transparent 45%),
+        #fffbeb;
+    }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: rgba(3, 9, 20, 0.6); }
-        ::-webkit-scrollbar-thumb { background: var(--hud-primary); border-radius: 9999px; }
-    </style>
+    /* Refractive Liquid Glass Cover */
+    .liquid-glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .liquid-glass::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -30%;
+      width: 160%;
+      height: 45%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 100%);
+      transform: rotate(-4deg);
+      pointer-events: none;
+    }
+
+    .liquid-pill {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 1);
+    }
+
+    /* Custom Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.12);
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #0284c7;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.45);
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: rgba(255, 255, 255, 0.92);
+      color: #0284c7;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.18), inset 0 1px 1px #fff;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between select-none p-2.5 sm:p-5 state-online relative" id="app-body">
+<body class="relative flex flex-col justify-between p-3 select-none">
 
-    <!-- ================= UPGRADE #1: LIVE AR CAMERA VISION OVERLAY ================= -->
-    <video id="ar-camera-feed" autoplay playsinline muted class="hidden"></video>
-    <canvas id="ar-capture-canvas" class="hidden"></canvas>
-    <div id="ar-reticle" class="hidden flex items-center justify-center">
-        <div class="w-64 h-64 border border-dashed border-cyan-400/40 rounded-full flex items-center justify-center">
-            <div class="w-3 h-3 border-t-2 border-l-2 border-cyan-300"></div>
+  <!-- Animated Mesh Background -->
+  <div class="mesh-bg"></div>
+
+  <!-- TOP STATUS BAR (Fixed Height: 58px) -->
+  <header class="liquid-glass z-10 rounded-3xl px-4 py-2.5 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-2xl bg-sky-500/15 border border-white flex items-center justify-center text-sky-600 font-extrabold text-sm shadow-inner">
+        ✨
+      </div>
+      <div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-sky-700">Liquid OS // Sir</span>
+          <span id="apiDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         </div>
-        <div class="fixed top-20 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-950/80 border border-cyan-400 text-[10px] font-hud tracking-widest text-cyan-300 uppercase">
-            Holographic AR Vision Active — Tap "SCAN OBJECT" to Analyze
-        </div>
+        <h1 id="clockDisplay" class="text-sm font-extrabold text-slate-900 leading-tight">Sun 25 Oct • 07:36 AM</h1>
+      </div>
     </div>
 
-    <!-- ================= TOP HUD BAR ================= -->
-    <header class="w-full max-w-4xl mx-auto flex items-center justify-between px-3 py-2 hud-panel hud-corner rounded-xl z-20">
-        <div class="flex items-center space-x-2">
-            <div class="relative flex items-center justify-center w-3.5 h-3.5">
-                <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span id="status-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
-            </div>
-            <span id="hud-title-label" class="font-hud font-extrabold tracking-widest text-sm sm:text-xl text-cyan-300 drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">J.A.R.V.I.S.</span>
-            <span id="suit-mark-label" class="hidden md:inline-block text-[10px] text-cyan-400/80 tracking-widest font-mono border-l border-cyan-500/30 pl-2">MARK VII HUD</span>
-        </div>
-
-        <div class="flex items-center space-x-1.5 sm:space-x-2">
-            <!-- Continuous Live Mode Toggle -->
-            <button id="live-mode-btn" onclick="toggleContinuousLiveMode()" title="Toggle Hands-Free Live Mode" class="hud-panel px-2 py-1 rounded-full text-emerald-300 border-emerald-400/60 flex items-center space-x-1 text-[10px] sm:text-xs font-hud tracking-wider">
-                <span id="live-mode-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="live-mode-label">LIVE: ON</span>
-            </button>
-
-            <!-- Live Status Pill -->
-            <div id="status-badge" class="hidden xs:flex items-center space-x-1 px-2.5 py-1 rounded-full bg-cyan-950/90 border border-cyan-400/50 text-cyan-300 text-[10px] sm:text-xs font-hud tracking-wider">
-                <span id="status-text">ONLINE</span>
-            </div>
-
-            <!-- UPGRADE #4: Armor Suit Theme Switcher Button -->
-            <button onclick="cycleSuitTheme()" title="Switch Armor Suit Theme" class="hud-panel p-2 rounded-lg text-cyan-300 hover:text-white flex items-center space-x-1 text-xs font-hud">
-                <i data-lucide="shield" class="w-4 h-4 text-cyan-400"></i>
-                <span id="theme-btn-label" class="hidden sm:inline text-[10px]">MK-VII</span>
-            </button>
-
-            <!-- Sound / Voice Mode Toggle -->
-            <button id="voice-mode-btn" onclick="toggleVoiceEngine()" title="Switch Voice Engine" class="hud-panel p-2 rounded-lg text-cyan-300 hover:text-white flex items-center space-x-1 text-xs font-semibold">
-                <i data-lucide="volume-2" class="w-4 h-4 text-cyan-400"></i>
-                <span id="voice-engine-label" class="hidden md:inline text-[10px] font-hud">FREE VOICE</span>
-            </button>
-
-            <!-- HIGH-VISIBILITY API KEY & SETTINGS BUTTON (Works even if icons don't load) -->
-            <button onclick="openModal('settings-modal')" title="Enter API Key & Settings" class="hud-panel px-2.5 py-1.5 rounded-lg bg-amber-500/20 border border-amber-400 text-amber-300 hover:bg-amber-400 hover:text-slate-950 font-hud font-bold text-[10px] sm:text-xs tracking-wider flex items-center space-x-1 relative shadow-[0_0_12px_rgba(251,191,36,0.35)]">
-                <span>🔑 KEY</span>
-                <span id="api-key-warning-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-ping"></span>
-            </button>
-        </div>
-    </header>
-
-    <!-- ALWAYS-VISIBLE QUICK API KEY INPUT BAR (Hides automatically once your key is saved) -->
-    <div id="api-key-banner" class="w-full max-w-4xl mx-auto mt-2 hud-panel rounded-xl p-2.5 sm:px-4 sm:py-2.5 border border-amber-400/80 bg-amber-950/70 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-xs text-amber-200 z-20 shadow-[0_0_20px_rgba(251,191,36,0.2)]">
-        <div class="flex items-center space-x-2">
-            <span class="text-base">🔑</span>
-            <span><strong>Step 1:</strong> Paste your free Gemini API key (<a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline text-amber-300 font-bold">Get Key Here</a>):</span>
-        </div>
-        <div class="flex items-center space-x-1.5 flex-1 max-w-md">
-            <input type="password" id="quick-banner-api-key" placeholder="Paste AIza... key here" class="flex-1 bg-slate-950/90 border border-amber-400/60 rounded-lg px-2.5 py-1.5 text-xs text-amber-100 placeholder-amber-400/50 focus:outline-none" />
-            <button onclick="saveQuickBannerKey()" class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-hud font-bold text-[11px] tracking-wider shrink-0 hover:bg-amber-300">
-                SAVE KEY
-            </button>
-        </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" id="themeBtn" class="liquid-pill px-3 py-1.5 rounded-2xl text-xs font-bold text-slate-700 active:scale-95 transition">
+        ☀️ Crisp
+      </button>
+      <button onclick="toggleModal('settingsModal')" class="liquid-pill w-8 h-8 rounded-2xl flex items-center justify-center text-sm active:scale-95 transition" title="API Key & Voice Settings">
+        🔑
+      </button>
     </div>
+  </header>
 
-    <!-- ================= MAIN HOLOGRAPHIC INTERFACE ================= -->
-    <main class="w-full max-w-4xl mx-auto flex-1 flex flex-col justify-center my-2 sm:my-3 relative z-10">
-        
-        <!-- 3-Column Layout on Tablet/Desktop, Compact HUD Grid on Mobile -->
-        <div class="grid grid-cols-12 gap-2 sm:gap-3.5 items-center">
-            
-            <!-- LEFT TELEMETRY COLUMN (4 modules: Power Core, Weather Radar, Voice FFT, Memory) -->
-            <div class="col-span-12 sm:col-span-3 grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-2.5 order-2 sm:order-1">
-                
-                <!-- UPGRADE #2: Real Phone Hardware Telemetry (Battery & Network) -->
-                <button onclick="readOutHardwareTelemetry()" class="hud-panel hud-corner rounded-xl p-2.5 sm:p-3 text-left flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-cyan-400 mb-0.5">
-                        <div class="flex items-center space-x-1.5">
-                            <i data-lucide="battery-charging" class="w-4 h-4"></i>
-                            <span class="font-hud text-[10px] sm:text-xs font-bold tracking-wider text-cyan-200">POWER CORE</span>
-                        </div>
-                        <span id="net-type-badge" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">WIFI</span>
-                    </div>
-                    <div class="text-[11px] sm:text-xs text-emerald-400 font-semibold flex items-center justify-between">
-                        <span id="battery-level-readout">● 100% Optimal</span>
-                        <span id="core-model-readout" class="text-[10px] text-cyan-400/70 font-mono truncate max-w-[75px]">2.5-Flash</span>
-                    </div>
-                    <div class="w-full bg-slate-900/90 h-1.5 rounded-full mt-1.5 overflow-hidden border border-cyan-500/30">
-                        <div id="battery-bar-fill" class="h-full bg-cyan-400 transition-all duration-500" style="width: 100%"></div>
-                    </div>
-                </button>
+  <!-- MAIN SINGLE-SCREEN WORKSPACE (Fills remaining height, zero scroll) -->
+  <main class="relative z-10 flex-1 my-2.5 overflow-hidden flex flex-col">
 
-                <!-- UPGRADE #3: Live Local Weather & Radar Card -->
-                <button onclick="fetchLiveWeather(true)" class="hud-panel hud-corner rounded-xl p-2.5 sm:p-3 text-left flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-cyan-400 mb-0.5">
-                        <div class="flex items-center space-x-1.5">
-                            <i data-lucide="cloud-sun" class="w-4 h-4"></i>
-                            <span class="font-hud text-[10px] sm:text-xs font-bold tracking-wider text-cyan-200">ATMOS RADAR</span>
-                        </div>
-                        <span class="text-[9px] font-mono text-cyan-400/70">GPS</span>
-                    </div>
-                    <div id="weather-temp-readout" class="text-xs sm:text-sm font-hud font-bold text-cyan-100">
-                        TAP FOR LOCAL SCAN
-                    </div>
-                    <div id="weather-cond-readout" class="text-[10px] text-cyan-300/80 truncate mt-0.5">
-                        Open-Meteo Orbital Link Ready
-                    </div>
-                </button>
+    <!-- DECK 1: WORKSPACE (GOOGLE CALENDAR & GMAIL LIVE SYNC) -->
+    <section id="deck-workspace" class="deck-panel h-full flex flex-col justify-between gap-2.5">
+      <!-- Top Greeting + Quick Voice Trigger -->
+      <div class="liquid-glass rounded-3xl p-3.5 flex items-center justify-between shrink-0">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Barnsley, UK • 9°C Crisp</p>
+          <h2 class="text-base font-extrabold text-slate-900">Good morning, sir.</h2>
+        </div>
+        <button onclick="speakBrief()" id="quickSpeakBtn" class="px-3.5 py-2 rounded-2xl bg-sky-600 text-white font-bold text-xs shadow-md shadow-sky-500/25 flex items-center gap-1.5 active:scale-95 transition">
+          <span>🎙️</span> <span id="quickSpeakLabel">Speak Brief, Sir</span>
+        </button>
+      </div>
 
-                <!-- UPGRADE #5: Real-Time FFT Voice Frequency Analyzer Card -->
-                <button onclick="toggleMute()" class="hud-panel hud-corner rounded-xl p-2.5 sm:p-3 text-left flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-cyan-400 mb-0.5">
-                        <div class="flex items-center space-x-1.5">
-                            <i data-lucide="mic" class="w-4 h-4"></i>
-                            <span class="font-hud text-[10px] sm:text-xs font-bold tracking-wider text-cyan-200">VOICE FFT</span>
-                        </div>
-                        <span id="fft-db-readout" class="text-[9px] font-mono text-cyan-400/80">0 dB</span>
-                    </div>
-                    <div id="voice-status-readout" class="text-[11px] sm:text-xs text-emerald-400 font-semibold flex items-center space-x-1">
-                        <span>●</span>
-                        <span>Online</span>
-                    </div>
-                    <!-- Dynamic Equalizer Bars -->
-                    <div id="mini-voice-eq" class="flex items-end space-x-1 h-3.5 mt-1.5 opacity-85">
-                        <div class="eq-bar w-1.5 h-1.5 rounded-t"></div>
-                        <div class="eq-bar w-1.5 h-2.5 rounded-t"></div>
-                        <div class="eq-bar w-1.5 h-3.5 rounded-t"></div>
-                        <div class="eq-bar w-1.5 h-2 rounded-t"></div>
-                        <div class="eq-bar w-1.5 h-3 rounded-t"></div>
-                        <div class="eq-bar w-1.5 h-1.5 rounded-t"></div>
-                    </div>
-                </button>
+      <!-- Google Calendar Live Feed Card -->
+      <div class="liquid-glass rounded-3xl p-3.5 flex-1 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-sm">📅</span>
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Family Calendar • Today</h3>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 border border-emerald-500/20">Synced Live</span>
+        </div>
 
-                <!-- Memory Card -->
-                <button onclick="openModal('memory-modal')" class="hud-panel hud-corner rounded-xl p-2.5 sm:p-3 text-left flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-cyan-400 mb-0.5">
-                        <div class="flex items-center space-x-1.5">
-                            <i data-lucide="database" class="w-4 h-4"></i>
-                            <span class="font-hud text-[10px] sm:text-xs font-bold tracking-wider text-cyan-200">MEMORY</span>
-                        </div>
-                    </div>
-                    <div class="text-[11px] sm:text-xs text-emerald-400 font-semibold flex items-center space-x-1">
-                        <span>●</span>
-                        <span id="memory-count-readout">Ready (3)</span>
-                    </div>
-                    <div class="text-[10px] text-cyan-300/70 truncate mt-1">
-                        Tap to view / edit directives
-                    </div>
-                </button>
-            </div>
+        <div class="grid grid-cols-2 gap-2 my-auto">
+          <div class="liquid-pill rounded-2xl p-2.5 border-l-4 border-l-sky-500">
+            <p class="text-[10px] font-bold text-sky-700">10:00 – 16:00</p>
+            <p class="text-xs font-extrabold text-slate-900 truncate">Cian // Tesco Extra Shift</p>
+            <p class="text-[10px] text-slate-500 truncate">Barnsley Extra • Gen Merch</p>
+          </div>
+          <div class="liquid-pill rounded-2xl p-2.5 border-l-4 border-l-pink-500">
+            <p class="text-[10px] font-bold text-pink-700">04:30 – 08:30</p>
+            <p class="text-xs font-extrabold text-slate-900 truncate">Maegan work</p>
+            <p class="text-[10px] text-slate-500 truncate">Completed this morning</p>
+          </div>
+          <div class="liquid-pill rounded-2xl p-2.5 border-l-4 border-l-amber-500">
+            <p class="text-[10px] font-bold text-amber-700">11:00 – 20:00</p>
+            <p class="text-xs font-extrabold text-slate-900 truncate">Dad smyths</p>
+            <p class="text-[10px] text-slate-500 truncate">Smyths Toys Barnsley</p>
+          </div>
+          <div class="liquid-pill rounded-2xl p-2.5 border-l-4 border-l-indigo-500">
+            <p class="text-[10px] font-bold text-indigo-700">All Day • Sun</p>
+            <p class="text-xs font-extrabold text-slate-900 truncate">Joseph Half Term & Jadan</p>
+            <p class="text-[10px] text-slate-500 truncate">Jadan work 13:00–20:00</p>
+          </div>
+        </div>
+      </div>
 
-            <!-- CENTER ARC REACTOR CORE (Tap to Speak + FFT Reactive + Active Timer Ring) -->
-            <div class="col-span-12 sm:col-span-6 flex flex-col items-center justify-center order-1 sm:order-2 my-1 sm:my-0 relative">
-                <button type="button" id="arc-reactor-btn" onclick="handleCoreTap(event)" class="relative w-56 h-56 sm:w-72 sm:h-72 flex items-center justify-center cursor-pointer group focus:outline-none active:scale-95 transition-transform duration-150">
-                    
-                    <!-- SVG Arc Reactor Globe & Concentric Tech Rings -->
-                    <svg id="reactor-svg" viewBox="0 0 300 300" class="w-full h-full core-glow transition-transform duration-75 pointer-events-none">
-                        <defs>
-                            <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="var(--hud-primary)" stop-opacity="0.38"/>
-                                <stop offset="65%" stop-color="var(--hud-secondary)" stop-opacity="0.14"/>
-                                <stop offset="100%" stop-color="var(--hud-primary)" stop-opacity="0"/>
-                            </radialGradient>
-                        </defs>
+      <!-- Gmail Unread Priority Stream -->
+      <div class="liquid-glass rounded-3xl p-3.5 shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-sm">✉️</span>
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Gmail Unread • Last 24h</h3>
+          </div>
+          <span class="text-[10px] font-semibold text-slate-500">cian31110@gmail.com</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="liquid-pill rounded-2xl p-2">
+            <p class="text-[10px] font-bold text-rose-600 truncate">Google Security</p>
+            <p class="text-[11px] font-bold text-slate-800 truncate">Perplexity & Claude</p>
+            <p class="text-[9px] text-slate-500">07:30 AM • Connected</p>
+          </div>
+          <div class="liquid-pill rounded-2xl p-2">
+            <p class="text-[10px] font-bold text-sky-600 truncate">PayPal UK</p>
+            <p class="text-[11px] font-bold text-slate-800 truncate">Policy Updates</p>
+            <p class="text-[9px] text-slate-500">06:34 AM • Info only</p>
+          </div>
+          <div class="liquid-pill rounded-2xl p-2">
+            <p class="text-[10px] font-bold text-indigo-600 truncate">Dropbox</p>
+            <p class="text-[11px] font-bold text-slate-800 truncate">Terms Update</p>
+            <p class="text-[9px] text-slate-500">12:39 AM • No action</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-                        <!-- Ambient Center Glow -->
-                        <circle cx="150" cy="150" r="125" fill="url(#coreGrad)" class="core-pulse" />
+    <!-- DECK 2: TRIAGE (ZERO PRE-GENERATED TASKS) -->
+    <section id="deck-triage" class="deck-panel hidden h-full flex flex-col justify-between gap-2.5">
+      <div class="liquid-glass rounded-3xl p-3.5 shrink-0">
+        <div class="flex justify-between items-center mb-1.5">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700">⚡ Energy Level, Sir</span>
+          <span id="energyBadge" class="text-xs font-extrabold text-sky-700 bg-sky-500/15 px-2.5 py-0.5 rounded-full">75% • Sharp & Ready</span>
+        </div>
+        <input id="energySlider" type="range" min="10" max="100" step="5" value="75" class="w-full" oninput="updateEnergyLabel(this.value)" />
+      </div>
 
-                        <!-- Outer Segmented Ring (Slow Spin) -->
-                        <g class="ring-spin-1" style="transform-origin: 150px 150px;">
-                            <circle cx="150" cy="150" r="136" fill="none" stroke="var(--hud-primary)" stroke-width="1.5" stroke-opacity="0.35" stroke-dasharray="18 8 4 8" />
-                            <circle cx="150" cy="150" r="128" fill="none" stroke="var(--hud-primary)" stroke-width="4" stroke-opacity="0.6" stroke-dasharray="45 90" />
-                        </g>
+      <!-- Empty-by-default Custom Task Slate -->
+      <div class="liquid-glass rounded-3xl p-3.5 flex-1 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Your Personal Slate</h3>
+          <button onclick="triageWithGemini()" class="text-[11px] font-bold text-sky-700 bg-white/80 px-2.5 py-1 rounded-xl border border-white shadow-sm active:scale-95">
+            ✨ AI Sort
+          </button>
+        </div>
 
-                        <!-- Middle Counter-Rotating Ring -->
-                        <g class="ring-spin-2" style="transform-origin: 150px 150px;">
-                            <circle cx="150" cy="150" r="112" fill="none" stroke="var(--hud-primary)" stroke-width="2"
+        <!-- Strictly empty until user adds items -->
+        <div id="taskContainer" class="my-auto flex flex-col gap-1.5">
+          <div id="emptyTaskState" class="text-center py-6">
+            <p class="text-xs font-bold text-slate-600">Your slate is completely clear, sir.</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">No pre-generated tasks added. Enter an item below only if needed.</p>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <input id="newTaskInput" type="text" placeholder="Add a task if you wish, sir..." class="liquid-pill flex-1 rounded-2xl px-3 py-2 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none" />
+          <button onclick="addTask()" class="px-4 py-2 rounded-2xl bg-slate-900 text-white text-xs font-bold active:scale-95">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DECK 3: NATURAL STUDIO VOICE ANCHOR -->
+    <section id="deck-voice" class="deck-panel hidden h-full flex flex-col justify-between gap-2.5">
+      <div class="liquid-glass rounded-3xl p-4 flex-1 flex flex-col items-center justify-between text-center">
+        <div class="w-full flex items-center justify-between">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-sky-700">Gemini 2.5 Neural Audio</span>
+          <select id="voiceSelect" class="liquid-pill rounded-xl px-2.5 py-1 text-xs font-bold text-slate-700 outline-none">
+            <option value="Aoede">Aoede (Warm Natural)</option>
+            <option value="Puck">Puck (Crisp British Vibe)</option>
+            <option value="Charon">Charon (Calm & Grounded)</option>
+            <option value="Fenrir">Fenrir (Deep & Direct)</option>
+          </select>
+        </div>
+
+        <!-- 16-Bar Live Audio Visualizer -->
+        <div id="visualizer" class="flex items-center justify-center gap-1.5 h-20 w-full my-auto">
+          <div class="v-bar w-2 h-4 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-6 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-5 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-8 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-4 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-7 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-5 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-9 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-6 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-4 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-7 bg-sky-500 rounded-full transition-all duration-150"></div>
+          <div class="v-bar w-2 h-5 bg-sky-500 rounded-full transition-all duration-150"></div>
+        </div>
+
+        <p id="voiceTranscript" class="text-xs font-semibold text-slate-700 leading-relaxed px-2 line-clamp-3">
+          "Good morning, sir. Clocks fell back this morning. You have your Tesco Extra shift from 10:00 AM to 4:00 PM today, and Yorkshire Water is scheduled for the 28th."
+        </p>
+
+        <div class="w-full flex gap-2 mt-2">
+          <button onclick="speakBrief()" id="mainVoiceBtn" class="flex-1 py-3 rounded-2xl bg-sky-600 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 active:scale-95 transition">
+            ▶️ Play Natural Briefing, Sir
+          </button>
+        </div>
+      </div>
+
+      <div class="liquid-glass rounded-3xl p-3 flex gap-2 shrink-0">
+        <input id="voiceAskInput" type="text" placeholder="Ask your brief anything, sir..." class="liquid-pill flex-1 rounded-2xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none" />
+        <button onclick="askVoiceAnchor()" class="px-4 py-2 rounded-2xl bg-slate-900 text-white text-xs font-bold active:scale-95">Ask</button>
+      </div>
+    </section>
+
+    <!-- DECK 4: SAFE-TO-SPEND & BILL RADAR -->
+    <section id="deck-pulse" class="deck-panel hidden h-full flex flex-col justify-between gap-2.5">
+      <div class="liquid-glass rounded-3xl p-4 flex items-center justify-between shrink-0">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Daily Buffer • Sir</span>
+          <h3 id="safeSpendDisplay" class="text-2xl font-extrabold text-slate-900">£42.50</h3>
+          <p class="text-[11px] font-semibold text-emerald-700">Next automated bill in 3 days (28th)</p>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] font-bold text-slate-500 block">Monthly Automated</span>
+          <span class="text-sm font-extrabold text-slate-800">£317.98</span>
+        </div>
+      </div>
+
+      <!-- 3 Set Automated Bill Dates -->
+      <div class="liquid-glass rounded-3xl p-3.5 flex-1 flex flex-col justify-between">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Scheduled Automated Bills</h4>
+        <div class="grid grid-cols-3 gap-2 my-auto">
+          <div class="liquid-pill rounded-2xl p-2.5 text-center opacity-60">
+            <p class="text-[10px] font-bold text-slate-500">5th Oct • Paid</p>
+            <p class="text-xs font-extrabold text-slate-900">£218.99</p>
+            <p class="text-[9px] text-slate-500 truncate">Council • Ovo • Virgin</p>
+          </div>
+          <div class="liquid-pill rounded-2xl p-2.5 text-center opacity-60">
+            <p class="text-[10px] font-bold text-slate-500">18th Oct • Paid</p>
+            <p class="text-xs font-extrabold text-slate-900">£18.99</p>
+            <p class="text-[9px] text-slate-500 truncate">Google One</p>
+          </div>
+          <div class="liquid-pill rounded-2xl p-2.5 text-center border-2 border-sky-500/40">
+            <p class="text-[10px] font-extrabold text-sky-700">28th Oct • Due</p>
+            <p class="text-xs font-extrabold text-slate-900">£80.00</p>
+            <p class="text-[9px] text-slate-600 truncate">Yorkshire Water</p>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <input id="spendInput" type="number" step="0.01" placeholder="Log spend (£), sir..." class="liquid-pill flex-1 rounded-2xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none" />
+          <button onclick="logSpend()" class="px-4 py-2 rounded-2xl bg-slate-900 text-white text-xs font-bold active:scale-95">Deduct</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DECK 5: MICRO-PREP & UNPLUGGED STUDIO -->
+    <section id="deck-studio" class="deck-panel hidden h-full flex flex-col justify-between gap-2.5">
+      <!-- 60-Second Police / Driving Scenario Card -->
+      <div class="liquid-glass rounded-3xl p-3.5 flex-1 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700">🚓 60s Scenario Brief, Sir</span>
+          <button onclick="generateScenario()" class="text-[11px] font-bold text-sky-700 bg-white/80 px-2.5 py-1 rounded-xl border border-white">
+            🔄 New Scenario
+          </button>
+        </div>
+        <p id="scenarioText" class="text-xs font-semibold text-slate-800 leading-relaxed my-auto">
+          Tap "New Scenario" whenever you would like a quick-fire Police Constable Entry Programme (PCEP) or UK practical driving judgment check, sir.
+        </p>
+        <div class="flex gap-2">
+          <input id="scenarioAnswer" type="text" placeholder="Your response, sir..." class="liquid-pill flex-1 rounded-2xl px-3 py-1.5 text-xs font-semibold focus:outline-none" />
+          <button onclick="gradeScenario()" class="px-3.5 py-1.5 rounded-2xl bg-sky-600 text-white text-xs font-bold">Grade</button>
+        </div>
+      </div>
+
+      <!-- Acoustic Guitar Synthesizer Strip -->
+      <div class="liquid-glass rounded-3xl p-3.5 shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700">🎸 Unplugged Chord Strip</span>
+          <button onclick="strumProgression()" class="text-[10px] font-bold px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-900">
+            ▶️ Strum All
+          </button>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="playChord([196.00, 246.94, 293.66, 392.00])" class="liquid-pill py-2 rounded-2xl font-extrabold text-xs text-slate-800 active:scale-95">G</button>
+          <button onclick="playChord([164.81, 246.94, 329.63, 392.00])" class="liquid-pill py-2 rounded-2xl font-extrabold text-xs text-slate-800 active:scale-95">Em7</button>
+          <button onclick="playChord([130.81, 164.81, 293.66, 392.00])" class="liquid-pill py-2 rounded-2xl font-extrabold text-xs text-slate-800 active:scale-95">Cadd9</button>
+          <button onclick="playChord([146.83, 2
